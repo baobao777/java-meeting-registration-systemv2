@@ -1,0 +1,292 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "会议报名管理系统 API 测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "用户模块",
+      "item": [
+        {
+          "name": "注册",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/register",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"123456\",\"name\":\"测试用户\",\"email\":\"test@test.com\",\"phone\":\"13800138000\"}" }
+          }
+        },
+        {
+          "name": "重复注册_应失败",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/register",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"123456\",\"name\":\"测试用户\"}" }
+          }
+        },
+        {
+          "name": "登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}" }
+          }
+        },
+        {
+          "name": "登录_密码错误_应失败",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"wrong\"}" }
+          }
+        },
+        {
+          "name": "登录_用户不存在_应失败",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"nobody\",\"password\":\"123\"}" }
+          }
+        },
+        {
+          "name": "获取当前用户",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/user/info"
+          }
+        },
+        {
+          "name": "注销",
+          "request": {
+            "method": "POST",
+            "url": "http://localhost:8080/api/user/logout"
+          }
+        },
+        {
+          "name": "未登录访问_应401",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/user/info"
+          }
+        }
+      ]
+    },
+    {
+      "name": "管理员_会议管理",
+      "item": [
+        {
+          "name": "前置_管理员登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}" }
+          }
+        },
+        {
+          "name": "创建会议_有限容量",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting",
+            "body": { "mode": "raw", "raw": "{\"title\":\"2026年Q2技术研讨会\",\"description\":\"讨论最新技术趋势\",\"location\":\"3楼会议室A\",\"startTime\":\"2026-06-15T09:00:00\",\"endTime\":\"2026-06-15T12:00:00\",\"capacity\":30}" }
+          }
+        },
+        {
+          "name": "创建会议_不限容量",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting",
+            "body": { "mode": "raw", "raw": "{\"title\":\"全员大会\",\"description\":\"公司全员季度大会\",\"location\":\"1楼大礼堂\",\"startTime\":\"2026-07-01T14:00:00\",\"endTime\":\"2026-07-01T17:00:00\",\"capacity\":0}" }
+          }
+        },
+        {
+          "name": "获取会议列表",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/meeting/list"
+          }
+        },
+        {
+          "name": "获取会议详情",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/meeting/1"
+          }
+        },
+        {
+          "name": "获取不存在会议_应404",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/meeting/999"
+          }
+        },
+        {
+          "name": "编辑会议",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting/1",
+            "body": { "mode": "raw", "raw": "{\"title\":\"2026年Q2技术研讨会_更新\",\"description\":\"更新后的描述\",\"location\":\"3楼会议室B\",\"startTime\":\"2026-06-15T09:00:00\",\"endTime\":\"2026-06-15T12:00:00\",\"capacity\":50,\"status\":\"UPCOMING\"}" }
+          }
+        },
+        {
+          "name": "编辑不存在会议_应404",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting/999",
+            "body": { "mode": "raw", "raw": "{\"title\":\"不存在\"}" }
+          }
+        },
+        {
+          "name": "删除不存在会议_应404",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/meeting/999"
+          }
+        }
+      ]
+    },
+    {
+      "name": "报名流程",
+      "item": [
+        {
+          "name": "前置_普通用户登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}" }
+          }
+        },
+        {
+          "name": "检查报名_未报名",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/registration/check/1"
+          }
+        },
+        {
+          "name": "报名会议",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/registration",
+            "body": { "mode": "raw", "raw": "{\"meetingId\":1}" }
+          }
+        },
+        {
+          "name": "重复报名_应失败",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/registration",
+            "body": { "mode": "raw", "raw": "{\"meetingId\":1}" }
+          }
+        },
+        {
+          "name": "检查报名_已报名",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/registration/check/1"
+          }
+        },
+        {
+          "name": "查看我的报名",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/registration/my"
+          }
+        },
+        {
+          "name": "取消报名",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/registration/1"
+          }
+        },
+        {
+          "name": "取消已取消的报名_应失败",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/registration/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "满额测试_管理员",
+      "item": [
+        {
+          "name": "管理员登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}" }
+          }
+        },
+        {
+          "name": "创建限额1的会议",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting",
+            "body": { "mode": "raw", "raw": "{\"title\":\"限量会议\",\"startTime\":\"2026-08-01T10:00:00\",\"endTime\":\"2026-08-01T11:00:00\",\"capacity\":1}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "权限测试",
+      "item": [
+        {
+          "name": "管理员查看报名列表",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/registration/meeting/1"
+          }
+        },
+        {
+          "name": "普通用户创建会议_应403",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/user/login",
+            "body": { "mode": "raw", "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}" }
+          }
+        },
+        {
+          "name": "普通用户创建会议",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "http://localhost:8080/api/meeting",
+            "body": { "mode": "raw", "raw": "{\"title\":\"普通用户创建\",\"startTime\":\"2026-09-01T10:00:00\",\"endTime\":\"2026-09-01T11:00:00\"}" }
+          }
+        },
+        {
+          "name": "普通用户查看报名列表_应403",
+          "request": {
+            "method": "GET",
+            "url": "http://localhost:8080/api/registration/meeting/1"
+          }
+        },
+        {
+          "name": "普通用户删除会议_应403",
+          "request": {
+            "method": "DELETE",
+            "url": "http://localhost:8080/api/meeting/1"
+          }
+        }
+      ]
+    }
+  ]
+}

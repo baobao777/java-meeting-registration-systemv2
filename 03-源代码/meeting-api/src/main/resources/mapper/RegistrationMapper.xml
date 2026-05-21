@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.meeting.mapper.RegistrationMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO registration (user_id, meeting_id, status) VALUES (#{userId}, #{meetingId}, 'REGISTERED')
+    </insert>
+
+    <update id="cancel">
+        UPDATE registration SET status = 'CANCELLED' WHERE user_id = #{userId} AND meeting_id = #{meetingId} AND status = 'REGISTERED'
+    </update>
+
+    <select id="findByUserAndMeeting" resultType="Registration">
+        SELECT * FROM registration WHERE user_id = #{userId} AND meeting_id = #{meetingId}
+    </select>
+
+    <resultMap id="RegistrationWithDetail" type="Registration" autoMapping="true">
+        <id property="id" column="id"/>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="RegistrationWithDetail">
+        SELECT r.*, m.title AS meeting_title, m.location AS meeting_location,
+               m.start_time AS meeting_start_time, m.end_time AS meeting_end_time
+        FROM registration r JOIN meeting m ON r.meeting_id = m.id
+        WHERE r.user_id = #{userId} ORDER BY m.start_time DESC
+    </select>
+
+    <select id="findByMeetingId" resultMap="RegistrationWithDetail">
+        SELECT r.*, u.name AS user_name, u.phone AS user_phone
+        FROM registration r JOIN `user` u ON r.user_id = u.id
+        WHERE r.meeting_id = #{meetingId} ORDER BY r.registered_at ASC
+    </select>
+
+    <select id="countByMeetingId" resultType="int">
+        SELECT COUNT(*) FROM registration WHERE meeting_id = #{meetingId} AND status = #{status}
+    </select>
+</mapper>

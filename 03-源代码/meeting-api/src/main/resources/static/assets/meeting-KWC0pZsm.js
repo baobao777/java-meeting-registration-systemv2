@@ -1,0 +1,1 @@
+import{a as t}from"./index-DIGsHSo1.js";function a(){return t.get("/api/meeting/list")}function g(e){return t.get(`/api/meeting/${e}`)}function r(e){return t.post("/api/meeting",e)}function u(e,i){return t.put(`/api/meeting/${e}`,i)}function o(e){return t.delete(`/api/meeting/${e}`)}export{a,r as c,o as d,g,u};

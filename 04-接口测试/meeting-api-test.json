@@ -1,0 +1,771 @@
+{
+  "info": {
+    "name": "会议报名管理系统 API 测试",
+    "description": "覆盖所有接口的正常流程和异常流程测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" }
+  ],
+  "item": [
+    {
+      "name": "1. 用户模块",
+      "item": [
+        {
+          "name": "注册新用户",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回用户名正确', () => pm.response.json().data.username === 'testuser');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"123456\",\"name\":\"测试用户\",\"email\":\"test@test.com\",\"phone\":\"13800138000\"}"
+            }
+          }
+        },
+        {
+          "name": "重复注册（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示用户名已存在', () => pm.expect(pm.response.json().message).to.include('已存在'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"123456\",\"name\":\"测试用户\"}"
+            }
+          }
+        },
+        {
+          "name": "登录（成功）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回角色信息', () => pm.expect(pm.response.json().data.role).to.exist);",
+                  "pm.test('密码被隐藏', () => pm.expect(pm.response.json().data.password).to.be.null);",
+                  "pm.environment.set('userId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "登录密码错误（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示密码错误', () => pm.expect(pm.response.json().message).to.include('密码'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"wrong\"}"
+            }
+          }
+        },
+        {
+          "name": "登录不存在的用户（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示用户不存在', () => pm.expect(pm.response.json().message).to.include('不存在'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"nobody\",\"password\":\"123\"}"
+            }
+          }
+        },
+        {
+          "name": "获取当前用户信息",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回用户名', () => pm.expect(pm.response.json().data.username).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/user/info"
+          }
+        },
+        {
+          "name": "注销登录",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/user/logout"
+          }
+        },
+        {
+          "name": "未登录时获取用户信息（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 401', () => pm.response.json().code === 401);",
+                  "pm.test('提示未登录', () => pm.expect(pm.response.json().message).to.include('未登录'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/user/info"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. 会议模块（管理员操作）",
+      "item": [
+        {
+          "name": "前置：管理员登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}"
+            }
+          }
+        },
+        {
+          "name": "创建会议（有限容量）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回会议标题正确', () => pm.response.json().data.title === '2026年Q2技术研讨会');",
+                  "pm.test('默认状态为 UPCOMING', () => pm.response.json().data.status === 'UPCOMING');",
+                  "pm.environment.set('meetingId1', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"2026年Q2技术研讨会\",\"description\":\"讨论最新技术趋势，包括AI、云原生等话题\",\"location\":\"3楼会议室A\",\"startTime\":\"2026-06-15T09:00:00\",\"endTime\":\"2026-06-15T12:00:00\",\"capacity\":30}"
+            }
+          }
+        },
+        {
+          "name": "创建会议（不限容量）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.environment.set('meetingId2', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"全员大会\",\"description\":\"公司全员季度大会\",\"location\":\"1楼大礼堂\",\"startTime\":\"2026-07-01T14:00:00\",\"endTime\":\"2026-07-01T17:00:00\",\"capacity\":0}"
+            }
+          }
+        },
+        {
+          "name": "获取所有会议列表",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回数组', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "pm.test('包含 registeredCount 字段', () => pm.expect(pm.response.json().data[0]).to.have.property('registeredCount'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meeting/list"
+          }
+        },
+        {
+          "name": "获取会议详情",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回会议信息完整', () => { var d = pm.response.json().data; pm.expect(d.title).to.exist; pm.expect(d.location).to.exist; pm.expect(d.startTime).to.exist; pm.expect(d.registeredCount).to.exist; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meeting/1"
+          }
+        },
+        {
+          "name": "获取不存在的会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 404', () => pm.response.json().code === 404);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/meeting/999"
+          }
+        },
+        {
+          "name": "编辑会议",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('标题已更新', () => pm.response.json().data.title === '2026年Q2技术研讨会（更新）');",
+                  "pm.test('容量已更新为50', () => pm.response.json().data.capacity === 50);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"2026年Q2技术研讨会（更新）\",\"description\":\"更新后的描述\",\"location\":\"3楼会议室B\",\"startTime\":\"2026-06-15T09:00:00\",\"endTime\":\"2026-06-15T12:00:00\",\"capacity\":50,\"status\":\"UPCOMING\"}"
+            }
+          }
+        },
+        {
+          "name": "编辑不存在的会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 404', () => pm.response.json().code === 404);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting/999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"不存在\"}"
+            }
+          }
+        },
+        {
+          "name": "删除不存在的会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 404', () => pm.response.json().code === 404);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/meeting/999"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. 报名模块",
+      "item": [
+        {
+          "name": "前置：普通用户登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "检查报名状态（未报名时）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回 false', () => pm.expect(pm.response.json().data).to.be.false);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/registration/check/1"
+          }
+        },
+        {
+          "name": "报名会议",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('状态为 REGISTERED', () => pm.response.json().data.status === 'REGISTERED');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/registration",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"meetingId\":1}"
+            }
+          }
+        },
+        {
+          "name": "重复报名同一个会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示已报名', () => pm.expect(pm.response.json().message).to.include('已报名'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/registration",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"meetingId\":1}"
+            }
+          }
+        },
+        {
+          "name": "检查报名状态（已报名）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回 true', () => pm.expect(pm.response.json().data).to.be.true);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/registration/check/1"
+          }
+        },
+        {
+          "name": "查看我的报名",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('返回报名列表', () => pm.expect(pm.response.json().data).to.be.an('array'));",
+                  "pm.test('关联了会议信息', () => { if(pm.response.json().data.length > 0) { pm.expect(pm.response.json().data[0]).to.have.property('meetingTitle'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/registration/my"
+          }
+        },
+        {
+          "name": "取消报名",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/registration/1"
+          }
+        },
+        {
+          "name": "取消已取消的报名（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示未报名', () => pm.expect(pm.response.json().message).to.include('未报名'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/registration/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. 报名满额测试",
+      "item": [
+        {
+          "name": "管理员登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}"
+            }
+          }
+        },
+        {
+          "name": "创建名额为1的会议用于满额测试",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.environment.set('limitedMeetingId', pm.response.json().data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"限量报名测试\",\"description\":\"仅限1人\",\"location\":\"测试\",\"startTime\":\"2026-08-01T10:00:00\",\"endTime\":\"2026-08-01T11:00:00\",\"capacity\":1}"
+            }
+          }
+        },
+        {
+          "name": "testuser 报名限额会议（应成功）",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "第一个用户报名",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/registration",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"meetingId\":3}"
+            }
+          }
+        },
+        {
+          "name": "注册第二个用户用于满额测试",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser2\",\"password\":\"123456\",\"name\":\"测试用户2\"}"
+            }
+          }
+        },
+        {
+          "name": "testuser2 登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser2\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "第二个用户报名限额会议（应满额拒绝）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 400', () => pm.response.json().code === 400);",
+                  "pm.test('提示名额已满', () => pm.expect(pm.response.json().message).to.include('名额已满'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/registration",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"meetingId\":3}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. 管理员查看报名列表",
+      "item": [
+        {
+          "name": "管理员登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"admin123\"}"
+            }
+          }
+        },
+        {
+          "name": "查看会议报名列表（管理员）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 200', () => pm.response.json().code === 200);",
+                  "pm.test('包含用户姓名电话', () => { if(pm.response.json().data.length > 0) { pm.expect(pm.response.json().data[0]).to.have.property('userName'); } });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/registration/meeting/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. 权限测试",
+      "item": [
+        {
+          "name": "普通用户登录",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/user/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"testuser2\",\"password\":\"123456\"}"
+            }
+          }
+        },
+        {
+          "name": "普通用户查看报名列表（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 403', () => pm.response.json().code === 403);",
+                  "pm.test('提示无权操作', () => pm.expect(pm.response.json().message).to.include('无权'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/registration/meeting/1"
+          }
+        },
+        {
+          "name": "普通用户创建会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 403', () => pm.response.json().code === 403);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/meeting",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"普通用户创建\",\"startTime\":\"2026-09-01T10:00:00\",\"endTime\":\"2026-09-01T11:00:00\"}"
+            }
+          }
+        },
+        {
+          "name": "普通用户删除会议（异常）",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('状态码 200', () => pm.response.to.have.status(200));",
+                  "pm.test('code 为 403', () => pm.response.json().code === 403);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/meeting/1"
+          }
+        }
+      ]
+    }
+  ]
+}
